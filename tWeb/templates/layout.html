@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}Trading404{% endblock %}
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/main.js' %}" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i> Trading404
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="{% url 'quant_lab:index' %}"><i class="fas fa-flask"></i> Quant Lab</a></li>
+                <li><a href="{% url 'posts:list' %}"><i class="fas fa-newspaper"></i> Posts</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'posts:new-post' %}"><i class="fas fa-plus-circle"></i> New Post</a></li>
+                    <li><a href="/screeners"><i class="fas fa-filter"></i> Screeners</a></li>
+                    <li>
+                        <form class="logout" action="{% url 'users:logout' %}" method="post">
+                            {% csrf_token %}
+                            <button class="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'users:register' %}"><i class="fas fa-user-plus"></i> Register</a></li>
+                    <li><a href="{% url 'users:login' %}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Anson Cheung.</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/_anson_cheung_?igsh=MTZyZ2ZwNzlqZ2N3bA%3D%3D&utm_source=qr"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/share/XbKZaf7hTsUEELzN/?mibextid=LQQJ4d"><i class="fab fa-facebook"></i></a>
+                <a href="https://www.linkedin.com/in/tsz-shun-cheung-63349a250/"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

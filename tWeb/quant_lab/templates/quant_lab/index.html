@@ -1,0 +1,91 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Quant Lab — Anson Cheung{% endblock %}
+
+{% block content %}
+<div class="quant-lab">
+    
+        <h1><i class="fas fa-flask"></i> Quant Lab </h1>
+        <p class="ql-subtitle">
+            Quantitative research — idea-driven strategies and the
+            methodological toolkits development . All results are pre-computed for
+            display.
+        </p>
+    </header>
+
+    <section class="ql-section">
+        <h2><i class="fas fa-chart-line"></i> Strategies</h2>
+        <div class="ql-grid">
+            {% for s in strategies %}
+                <a class="ql-card" href="{% url 'quant_lab:detail' s.slug %}">
+                    <div class="ql-card-header">
+                        <span class="ql-badge ql-badge-{{ s.provenance }}">
+                            {% if s.provenance == 'actual' %}Backtested{% else %}Illustrative{% endif %}
+                        </span>
+                        <span class="ql-cat">Strategy</span>
+                    </div>
+                    <h3>{{ s.title }}</h3>
+                    <p class="ql-summary">{{ s.summary }}</p>
+                    {% if s.metrics %}
+                        <div class="ql-metrics-mini">
+                            {% for k, v in s.metrics.items %}
+                                {% if forloop.counter <= 3 %}
+                                    <span><strong>{{ k }}:</strong> {{ v }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="ql-tags">
+                        {% for tag in s.tags %}<span class="ql-tag">{{ tag }}</span>{% endfor %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="ql-section">
+        <h2><i class="fas fa-toolbox"></i> Research Toolkits</h2>
+        <div class="ql-grid">
+            {% for t in toolkits %}
+                <a class="ql-card" href="{% url 'quant_lab:detail' t.slug %}">
+                    <div class="ql-card-header">
+                        <span class="ql-badge ql-badge-{{ t.provenance }}">
+                            {% if t.provenance == 'actual' %}Methodology{% else %}Illustrative{% endif %}
+                        </span>
+                        <span class="ql-cat">Toolkit</span>
+                    </div>
+                    <h3>{{ t.title }}</h3>
+                    <p class="ql-summary">{{ t.summary }}</p>
+                    <div class="ql-tags">
+                        {% for tag in t.tags %}<span class="ql-tag">{{ tag }}</span>{% endfor %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+.ql-header { text-align: center; margin-bottom: 2.5rem; }
+.ql-header h1 { font-size: 2.1rem; margin-bottom: 0.4rem; }
+.ql-subtitle { color: var(--slate-500); max-width: 680px; margin: 0 auto; font-size: 1rem; }
+.ql-section { margin-bottom: 2.75rem; }
+.ql-section h2 { border-bottom: 2px solid var(--slate-200); padding-bottom: 0.5rem; margin-bottom: 1.1rem; }
+.ql-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+.ql-card {
+    display: flex; flex-direction: column;
+    background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius);
+    padding: 1.4rem; text-decoration: none; color: inherit; box-shadow: var(--shadow-sm);
+    transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.ql-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--slate-300); }
+.ql-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+.ql-card h3 { font-size: 1.05rem; margin: 0 0 0.5rem 0; color: var(--navy-900); }
+.ql-summary { color: var(--slate-500); font-size: 0.9rem; flex-grow: 1; line-height: 1.55; }
+.ql-metrics-mini { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.8rem; color: var(--navy-700); margin: 0.85rem 0; }
+.ql-tags { margin-top: 0.85rem; }
+.ql-tag { display: inline-block; background: var(--slate-100); color: var(--slate-500); border-radius: 999px; padding: 2px 9px; font-size: 0.72rem; margin-right: 4px; }
+.ql-cat { font-size: 0.7rem; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.5px; }
+</style>
+{% endblock %}

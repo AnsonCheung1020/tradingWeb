@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Triple MA Strategy</title>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #fffcfc;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            color: #333;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #5feddf;
+            color: #fff;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        form button {
+            background-color: #5feddf;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        form button:hover {
+            background-color: #4ec7b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .results h2 {
+            color: #333;
+            text-align: center;
+        }
+        .results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .results li {
+            background-color: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            margin: 100px auto;
+        }
+        .double-bounce1, .double-bounce2 {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #5feddf;
+            opacity: 0.6;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: bounce 2.0s infinite ease-in-out;
+        }
+        .double-bounce2 {
+            animation-delay: -1.0s;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: scale(0.0);
+            }
+            50% {
+                transform: scale(1.0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-button">Back</a>
+    <div class="container">
+        <h1>Triple MA Strategy ⚔️ </h1>
+        <form id="screener-form" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Run Screener</button>
+        </form>
+        <div id="loading-spinner" class="spinner" style="display: none;">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+
+        {% if result %}
+        <div class="results">
+            <h2>Results:</h2>
+            <ul>
+                {% for stock in result %}
+                <li>{{ stock }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% block extra_js%}
+    <script>
+        document.getElementById('screener-form').addEventListener('submit', function(event) {
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

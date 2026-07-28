@@ -1,0 +1,265 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ entry.title }} — Quant Lab{% endblock %}
+
+{% block content %}
+<div class="quant-detail">
+    <a class="ql-back" href="{% url 'quant_lab:index' %}"><i class="fas fa-arrow-left"></i> Back to Quant Lab</a>
+
+    <header class="qld-header">
+        <div class="qld-title-block">
+            <div class="qld-title-meta">
+                <span class="ql-badge ql-badge-{{ entry.provenance }}">
+                    {% if is_actual %}
+                        <i class="fas fa-check-circle"></i> Backtested
+                    {% else %}
+                        <i class="fas fa-flask"></i> Illustrative
+                    {% endif %}
+                </span>
+                <span class="ql-cat-pill">{{ entry.category|title }}</span>
+            </div>
+            <h1 class="qld-title">{{ entry.title }}</h1>
+        </div>
+        <a class="qld-gh-btn" href="{{ github_url }}" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-github"></i>
+            <span class="qld-gh-btn-label">View source</span>
+        </a>
+    </header>
+
+    <div class="qld-layout">
+        <article class="qld-thesis">
+            <div class="qld-section-head">
+                <h2><i class="fas fa-lightbulb"></i> Idea & Economic Reasoning</h2>
+                <a class="qld-edit-btn" href="{% url 'quant_lab:edit_thesis' entry.slug %}">
+                    <i class="fas fa-pen"></i> Edit
+                </a>
+            </div>
+            {% if thesis_is_overridden %}
+                <p class="qld-overridden-note">
+                    <i class="fas fa-user-edit"></i>
+                    You've customised this section (saved in
+                    <code>quant_lab/thesis/{{ entry.slug }}.md</code>).
+                </p>
+            {% endif %}
+            <div class="qld-thesis-body">
+                {{ thesis_html|safe }}
+            </div>
+        </article>
+
+        <aside class="qld-side">
+            {% if entry.metrics %}
+                <div class="qld-card">
+                    <h3>Performance Metrics</h3>
+                    <table class="qld-metrics">
+                        <tbody>
+                            {% for m in metrics %}
+                                <tr>
+                                    <td class="qld-metric-label">{{ m.label }}</td>
+                                    <td class="qld-metric-value">{{ m.value }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if not is_actual %}
+                        <p class="qld-note">
+                            Values shown are illustrative placeholders pending a live
+                            backtest. Replace them in <code>quant_lab/catalog.py</code>.
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if entry.chart %}
+                <div class="qld-card">
+                    <div class="qld-section-head">
+                        <h3>Equity Curve</h3>
+                        <button class="qld-zoom-btn" id="ql-zoom-toggle" type="button" title="Zoom">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                    <img id="ql-chart"
+                         src="{% static 'quant_lab/'|add:entry.slug|add:'/'|add:entry.chart %}"
+                         alt="Equity curve for {{ entry.title }}"
+                         class="qld-chart">
+                    <p class="qld-chart-hint">Click the chart, or use the button, to open the zoom view. Scroll to zoom, drag to pan, Esc to close.</p>
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+
+<div class="qld-zoom-overlay" id="ql-zoom-overlay" hidden>
+    <button class="qld-zoom-close" id="ql-zoom-close" title="Close (Esc)"><i class="fas fa-times"></i></button>
+    <div class="qld-zoom-controls">
+        <button id="ql-zin"  title="Zoom in"><i class="fas fa-plus"></i></button>
+        <button id="ql-zout" title="Zoom out"><i class="fas fa-minus"></i></button>
+        <button id="ql-zreset" title="Reset"><i class="fas fa-undo"></i></button>
+    </div>
+    <div class="qld-zoom-stage" id="ql-zoom-stage">
+        <img id="ql-zoom-img" alt="Equity curve (zoomed)">
+    </div>
+</div>
+
+<style>
+.quant-detail { max-width: 1100px; margin: 0 auto; }
+.ql-back { display: inline-block; margin-bottom: 1rem; color: var(--slate-500); text-decoration: none; font-size: 0.9rem; }
+.ql-back:hover { color: var(--navy-900); }
+/* Header — compact card. The GitHub button is ABSOLUTELY pinned to the right
+   edge so its position is identical on every entry, regardless of how long the
+   title is. The title block reserves space on the right so it never overlaps. */
+.qld-header {
+    position: relative;
+    margin-bottom: 1.75rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid var(--slate-200);
+    border-left: 4px solid var(--brand);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+}
+.qld-title-block {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 170px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.qld-title-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.qld-cat-pill {
+    font-size: 0.68rem;
+    color: var(--brand-dark);
+    background: #dbeafe;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.qld-title {
+    font-size: 1.3rem;
+    line-height: 1.3;
+    margin: 0;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* GitHub button — pinned to the right edge, vertically centered, never moves.
+   No hover state: shown statically so its appearance is consistent. */
+.qld-gh-btn {
+    position: absolute;
+    top: 50%;
+    right: 1.4rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--navy-900);
+    color: #fff;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+}
+.qld-gh-btn:hover {
+    background: var(--navy-900);
+    text-decoration: none;
+}
+.qld-gh-btn i { font-size: 1.1rem; }
+@media (max-width: 760px) {
+    .qld-gh-btn-label { display: none; }
+    .qld-gh-btn { padding: 0.5rem 0.7rem; right: 1rem; }
+    .qld-title-block { padding-right: 56px; }
+    .qld-title { white-space: normal; }
+}
+.qld-layout { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
+@media (max-width: 860px) { .qld-layout { grid-template-columns: 1fr; } }
+
+.qld-section-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.qld-section-head h2, .qld-section-head h3 { margin: 0; }
+.qld-thesis h2 { font-size: 1.15rem; border-bottom: 2px solid var(--slate-200); padding-bottom: 0.5rem; width: 100%; }
+.qld-edit-btn {
+    font-size: 0.8rem; color: var(--brand); text-decoration: none;
+    padding: 4px 10px; border: 1px solid var(--slate-300); border-radius: 6px; background: #fff; white-space: nowrap;
+}
+.qld-edit-btn:hover { background: var(--slate-50); }
+.qld-overridden-note { font-size: 0.8rem; color: var(--brand-dark); background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 6px; margin: 0.75rem 0; }
+.qld-thesis-body { line-height: 1.7; color: var(--navy-800); }
+.qld-thesis-body h1,.qld-thesis-body h2,.qld-thesis-body h3 { margin-top: 1.25rem; }
+.qld-thesis-body ul, .qld-thesis-body ol { margin-left: 1.25rem; }
+.qld-thesis-body p { margin: 0 0 0.75rem; }
+
+.qld-side { display: flex; flex-direction: column; gap: 1.25rem; }
+.qld-card { background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow-sm); }
+.qld-card h3 { margin: 0 0 0.75rem 0; font-size: 1rem; }
+.qld-metrics { width: 100%; border-collapse: collapse; }
+.qld-metrics td { padding: 7px 0; border-bottom: 1px solid var(--slate-100); font-size: 0.92rem; }
+.qld-metric-label { color: var(--slate-500); }
+.qld-metric-value { text-align: right; font-weight: 600; color: var(--navy-900); }
+.qld-note { font-size: 0.8rem; color: var(--amber-700); margin-top: 0.75rem; margin-bottom: 0; }
+
+.qld-chart { width: 100%; height: auto; border-radius: 6px; cursor: zoom-in; display: block; }
+.qld-chart-hint { font-size: 0.75rem; color: var(--slate-400); margin: 0.5rem 0 0; }
+.qld-zoom-btn { background: #fff; border: 1px solid var(--slate-300); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; color: var(--slate-500); }
+.qld-zoom-btn:hover { background: var(--slate-50); color: var(--navy-900); }
+
+.qld-zoom-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(15,23,42,.92); display: flex; align-items: center; justify-content: center; }
+.qld-zoom-overlay[hidden] { display: none; }
+.qld-zoom-close { position: absolute; top: 16px; right: 18px; background: rgba(255,255,255,.12); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+.qld-zoom-close:hover { background: rgba(255,255,255,.22); }
+.qld-zoom-controls { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+.qld-zoom-controls button { background: rgba(255,255,255,.12); color: #fff; border: none; width: 38px; height: 38px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; }
+.qld-zoom-controls button:hover { background: rgba(255,255,255,.22); }
+.qld-zoom-stage { max-width: 92vw; max-height: 86vh; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: grab; }
+.qld-zoom-stage:active { cursor: grabbing; }
+#ql-zoom-img { max-width: none; transform-origin: center center; transition: transform .12s ease-out; user-select: none; -webkit-user-drag: none; }
+</style>
+
+<script>
+(function () {
+    var overlay = document.getElementById('ql-zoom-overlay');
+    if (!overlay) return;
+    var img = document.getElementById('ql-zoom-img');
+    var stage = document.getElementById('ql-zoom-stage');
+    var btnOpen = document.getElementById('ql-zoom-toggle');
+    var btnClose = document.getElementById('ql-zoom-close');
+    var chartImg = document.getElementById('ql-chart');
+
+    var scale = 1, panX = 0, panY = 0, dragging = false, lastX = 0, lastY = 0;
+    function apply() { img.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + scale + ')'; }
+    function open() {
+        img.src = chartImg.src; scale = 1; panX = 0; panY = 0; apply();
+        overlay.hidden = false; document.body.style.overflow = 'hidden';
+    }
+    function close() { overlay.hidden = true; document.body.style.overflow = ''; }
+    function setScale(s) { scale = Math.max(0.5, Math.min(6, s)); if (scale === 1) { panX = 0; panY = 0; } apply(); }
+
+    if (chartImg) chartImg.addEventListener('click', open);
+    btnOpen.addEventListener('click', open);
+    btnClose.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.getElementById('ql-zin').addEventListener('click', function () { setScale(scale * 1.25); });
+    document.getElementById('ql-zout').addEventListener('click', function () { setScale(scale / 1.25); });
+    document.getElementById('ql-zreset').addEventListener('click', function () { setScale(1); });
+    stage.addEventListener('wheel', function (e) { e.preventDefault(); setScale(scale * (e.deltaY < 0 ? 1.1 : 0.9)); }, { passive: false });
+    stage.addEventListener('mousedown', function (e) { if (scale === 1) return; dragging = true; lastX = e.clientX; lastY = e.clientY; });
+    window.addEventListener('mousemove', function (e) { if (!dragging) return; panX += e.clientX - lastX; panY += e.clientY - lastY; lastX = e.clientX; lastY = e.clientY; apply(); });
+    window.addEventListener('mouseup', function () { dragging = false; });
+    document.addEventListener('keydown', function (e) {
+        if (overlay.hidden) return;
+        if (e.key === 'Escape') close();
+        else if (e.key === '+' || e.key === '=') setScale(scale * 1.15);
+        else if (e.key === '-' || e.key === '_') setScale(scale / 1.15);
+        else if (e.key === '0') setScale(1);
+    });
+})();
+</script>
+{% endblock %}

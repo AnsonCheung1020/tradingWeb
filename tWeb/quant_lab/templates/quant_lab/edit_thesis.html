@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit — {{ entry.title }}{% endblock %}
+
+{% block content %}
+<div class="quant-edit" style="max-width: 880px; margin: 0 auto;">
+    <a class="ql-back" href="{% url 'quant_lab:detail' entry.slug %}" style="display:inline-block;margin-bottom:1rem;color:var(--slate-500);text-decoration:none;font-size:0.9rem;">
+        <i class="fas fa-arrow-left"></i> Cancel & back to {{ entry.title }}
+    </a>
+
+    <h1><i class="fas fa-pen"></i> Edit Idea & Economic Reasoning</h1>
+    <p style="color:var(--slate-500);margin-top:-0.25rem;">
+        <strong>{{ entry.title }}</strong>
+    </p>
+
+    {% if is_overridden %}
+        <p class="qld-overridden-note" style="font-size:0.85rem;color:var(--brand-dark);background:#eff6ff;padding:0.6rem 0.85rem;border-radius:6px;">
+            <i class="fas fa-info-circle"></i>
+            You are editing a customised version. Saving overwrites
+            <code>quant_lab/thesis/{{ entry.slug }}.md</code>. To revert to the
+            original, delete that file.
+        </p>
+    {% else %}
+        <p class="qld-overridden-note" style="font-size:0.85rem;color:var(--slate-500);background:var(--slate-50);padding:0.6rem 0.85rem;border-radius:6px;">
+            <i class="fas fa-info-circle"></i>
+            This is the default text from <code>catalog.py</code>. Saving creates
+            <code>quant_lab/thesis/{{ entry.slug }}.md</code>, which will override the
+            default on every page load.
+        </p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_thesis">Markdown content</label>
+            <textarea id="id_thesis" name="thesis" style="min-height:380px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:0.9rem;line-height:1.6;">{{ thesis_md }}</textarea>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+            <button type="submit" class="form-submit">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <a href="{% url 'quant_lab:detail' entry.slug %}" style="color:var(--slate-500);text-decoration:none;font-size:0.9rem;">
+                Cancel
+            </a>
+        </div>
+    </form>
+
+    <div class="card" style="margin-top:1.5rem;background:var(--slate-50);">
+        <h3 style="margin-top:0;"><i class="fas fa-keyboard"></i> Markdown cheat-sheet</h3>
+        <ul style="margin:0;padding-left:1.25rem;color:var(--slate-500);font-size:0.88rem;line-height:1.8;">
+            <li><code>**bold**</code> → <strong>bold</strong></li>
+            <li><code>*italic*</code> → <em>italic</em></li>
+            <li><code>`code`</code> → <code>code</code></li>
+            <li><code># Heading</code>, <code>## Sub-heading</code></li>
+            <li><code>1. first</code>, <code>2. second</code> → numbered list</li>
+            <li><code>- item</code> → bullet list</li>
+            <li>Blank line = new paragraph</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

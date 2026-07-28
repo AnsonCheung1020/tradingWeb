@@ -1,0 +1,26 @@
+# Render Blueprint — auto-detected by Render when you connect this repo.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After connecting the GitHub repo, Render will offer to apply this blueprint.
+# It creates one web service (free tier) running Gunicorn behind HTTPS.
+
+services:
+  - type: web
+    name: tradingweb
+    runtime: python
+    region: singapore        # closest to HK; change if you prefer
+    plan: free               # free tier: spins down after 15 min idle
+    branch: main             # deploy from main
+    rootDir: tWeb            # the Django project lives in tWeb/
+    buildCommand: ./build.sh
+    startCommand: gunicorn tWeb.wsgi:application --chdir tWeb
+    healthCheckPath: /
+    autoDeploy: true         # re-deploy automatically on every push to main
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      - key: SECRET_KEY
+        generateValue: true  # Render creates a strong random secret for you
+      - key: DEBUG
+        value: "0"
+      # ALLOWED_HOSTS defaults to .onrender.com in settings.py — no need to set it

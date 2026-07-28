@@ -1,0 +1,23 @@
+#
+# Python dependencies for tradingWeb (Django)
+# Python 3.10
+#
+Django==5.0.6
+gunicorn==23.0.0
+whitenoise==6.7.0
+#
+# App runtime deps (pinned to local versions)
+#
+yfinance==0.2.65
+pandas==2.2.2
+numpy==1.26.4
+pandas-datareader==0.10.0
+Pillow==10.4.0
+requests==2.32.5
+requests-cache==1.2.1
+requests-ratelimiter==0.7.0
+sqlparse==0.5.0
+#
+# NOTE: TA-Lib==0.4.32 is installed separately in build.sh because its underlying
+# C library must be compiled first. See build.sh.
+#

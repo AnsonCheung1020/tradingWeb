@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block title %}Create New Post{% endblock %}
+
+{% block content %}
+<section class="new-post-section">
+    <h1 class="page-title">Create a New Post</h1>
+    <form class="post-form" action="{% url 'posts:new-post' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Create Post</button>
+    </form>
+</section>
+{% endblock %}

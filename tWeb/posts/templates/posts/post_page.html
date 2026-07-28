@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ post.title}}{% endblock %}
+
+{% block content %}
+<section>
+    
+
+    <div class="flex-container">
+
+        <div class="text-content">
+            <h1 class="page-title">{{ post.title }}</h1>
+            <p class="mt-2">{{ post.date}}</p>
+            <div class="post-body mt-2">
+            <p>{{ post.body|linebreaks }}</p>
+            </div>
+        </div>
+        
+        <!-- Right column for the explainer image -->
+        <div class="image-content">
+            <img class="explainer" src="{{post.explainer.url}}" alt="{{post.title}}" />
+        </div>
+        
+    </div>
+</section>
+{% endblock %}
