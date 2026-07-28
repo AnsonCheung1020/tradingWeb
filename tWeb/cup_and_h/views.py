@@ -2,7 +2,6 @@ from django.shortcuts import render
 import pandas as pd
 import datetime as dt
 import yfinance as yf
-import talib
 import os
 import numpy as np
 

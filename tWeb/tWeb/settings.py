@@ -31,7 +31,7 @@ DEBUG = os.environ.get('DEBUG', '1') == '1'
 
 # Allow the dev host, the deploy host (Render gives *.onrender.com),
 # and any custom domain you set via the ALLOWED_HOSTS env var (comma-separated).
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"] + [
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com", ".pythonanywhere.com"] + [
     h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()
 ]
 

@@ -4,9 +4,8 @@ import pandas as pd
 import datetime as dt
 import yfinance as yf
 import json
-import talib
 import os
-import threading 
+import threading
 ## track the screener process by threading and terminate the process freely
 terminate_flag = False
 screener_thread = None

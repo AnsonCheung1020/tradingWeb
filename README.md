@@ -1,70 +1,96 @@
-# Trading404 — Live Web App
+# Trading404 — Live Web App (Free Hosting)
 
 A Django web application showcasing trading screeners, quantitative research
-(Quant Lab), and blog posts. Hosted free on **Render** with auto-deploy from GitHub.
+(Quant Lab), and blog posts.
 
-🔗 **Live site:** `https://tradingweb.onrender.com` *(once deployed — see below)*
-
----
-
-## Why Render (not GitHub Pages)?
-
-GitHub Pages can **only host static sites** (plain HTML/CSS/JS). This app is
-**Django** — it runs Python on the server (database, views, quant_lab catalog).
-That needs a real application server. **Render** is the modern Heroku-style host
-that:
-
-- ✅ Has a free tier (sufficient for a CV/portfolio demo)
-- ✅ Auto-deploys every time you `git push` to GitHub
-- ✅ Gives you a public HTTPS URL like `https://tradingweb.onrender.com`
-- ✅ Reads this repo's `render.yaml` blueprint automatically
+🔗 **Live site (after deploy):** `https://<your-username>.pythonanywhere.com`
 
 ---
 
-## 🚀 First-time deployment (≈5 minutes, one-time)
+## 💡 Why PythonAnywhere? (Free, no credit card)
 
-### Step 1 — Push this code to a GitHub repo
-*(I do this for you in the steps below — repo name: `tradingWeb`)*
+This app is **Django** (Python on a server), so it can't go on GitHub Pages
+(static-only). Hosts that run Django:
 
-### Step 2 — Connect Render to GitHub
-1. Go to **https://render.com** → sign up / log in (use the GitHub button).
-2. Click **New +** → **Blueprint**.
-3. Select the **`tradingWeb`** repo. Render detects `render.yaml` and shows the
-   service config.
-4. Click **Apply**. Render will:
-   - Build: install Python deps + compile TA-Lib + `collectstatic` + `migrate`
-   - Start: `gunicorn tWeb.wsgi:application`
-5. Wait ~3–5 min for the first build. When it says **Live**, open the URL. 🎉
+| Host | Free tier? | Card needed? | Auto-deploy from git? |
+|------|-----------|--------------|------------------------|
+| **PythonAnywhere** ✅ | Yes | **No** | Via a `git pull` button |
+| Render | Trial only | **Yes** | Yes |
+| Heroku | No | Yes | Yes |
 
-That's it. Your CV link is `https://tradingweb.onrender.com`.
-
-### Step 3 (recommended) — Set a strong secret
-In Render → your service → **Environment** → confirm `SECRET_KEY` was auto-generated
-(it is, via `generateValue: true` in `render.yaml`). Leave `DEBUG=0`.
+**PythonAnywhere is the only one that's truly free with no card** — perfect for
+a CV/portfolio link. The only caveat: the free tier doesn't auto-deploy on push,
+so redeploying is a 1-line command (see below).
 
 ---
 
-## 🔁 How to RE-HOST / redeploy after changes
+## 🚀 Deploy on PythonAnywhere (≈10 minutes, one-time)
 
-This is the best part — **you don't re-host, you just push.**
+### 1. Create a free account
+Go to **https://www.pythonanywhere.com** → **Create a free Beginner account**.
+Pick a username — that becomes your URL (`https://<username>.pythonanywhere.com`).
 
+### 2. Open a Bash console and clone this repo
+On the PythonAnywhere Dashboard → **Consoles** tab → **Bash**. Run:
 ```bash
-# 1. Make your changes (frontend templates, backend views, anything)
-
-# 2. Commit them
-cd ~/Desktop/tradingWeb
-git add -A
-git commit -m "Describe your change"
-
-# 3. Push to GitHub
-git push
+git clone https://github.com/AnsonCheung1020/tradingWeb.git mysite
 ```
 
-**Render auto-detects the push and redeploys automatically** (typically 2–4 min).
-Refresh your live URL and the changes are live. No manual steps.
+### 3. Install the Python dependencies
+In the same Bash console:
+```bash
+pip3.10 install --user -r ~/mysite/tWeb/requirements.txt
+```
 
-> If you ever change `requirements.txt` (add a new Python package), the rebuild
-> will reinstall everything — still automatic.
+### 4. Create the web app
+Dashboard → **Web** tab → **Add a new web app** → **Manual configuration** → **Python 3.10**.
+
+### 5. Point it at your code
+On the Web tab, set:
+- **Source code:** `/home/<your-username>/mysite/tWeb`
+- **Working directory:** `/home/<your-username>/mysite/tWeb`
+- **WSGI configuration file:** click the link, delete everything in it, and paste
+  the contents of `mysite/tWeb/pythonanywhere_wsgi.py`. **Replace `<your-username>`**
+  (3 places) with your actual PythonAnywhere username. Save.
+
+### 6. Add static + media file mappings
+On the Web tab, **Static files** section → add:
+| URL | Directory |
+|-----|-----------|
+| `/static/` | `/home/<your-username>/mysite/tWeb/assets` |
+| `/media/` | `/home/<your-username>/mysite/tWeb/media` |
+
+### 7. Build static files + database
+Back in the Bash console:
+```bash
+cd ~/mysite/tWeb
+python3.10 manage.py collectstatic --noinput
+python3.10 manage.py migrate
+```
+
+### 8. Go live
+Web tab → big green **Reload** button. Open `https://<your-username>.pythonanywhere.com`. 🎉
+
+---
+
+## 🔁 How to RE-DEPLOY after changes (your second question)
+
+Because PythonAnywhere's free tier isn't auto-deploy, updating is **3 commands**
+in a Bash console on PythonAnywhere:
+
+```bash
+cd ~/mysite
+git pull                       # 1. fetch your latest changes from GitHub
+cd ~/mysite/tWeb
+python3.10 manage.py collectstatic --noinput   # 2. refresh static files (if frontend changed)
+python3.10 manage.py migrate                   # 3. apply DB migrations (if models changed)
+```
+Then hit the **Reload** button on the Web tab. Done.
+
+> 💡 **One-line version** (frontend-only change): `cd ~/mysite && git pull && cd tWeb && python3.10 manage.py collectstatic --noinput`
+
+So your workflow is: edit locally → `git push` from your Mac → SSH/console into
+PythonAnywhere → the 3 commands above.
 
 ---
 
@@ -72,12 +98,11 @@ Refresh your live URL and the changes are live. No manual steps.
 
 | File | Purpose |
 |------|---------|
-| `render.yaml` | Render Blueprint — tells Render how to build & run the app |
-| `Procfile` | Fallback start command for other PaaS hosts (Heroku-style) |
+| `tWeb/pythonanywhere_wsgi.py` | **WSGI entry point for PythonAnywhere** (paste into their config) |
 | `tWeb/requirements.txt` | Pinned Python dependencies |
-| `tWeb/build.sh` | Build script: installs deps, compiles TA-Lib C lib, collects static, migrates |
 | `tWeb/tWeb/settings.py` | Production-aware (reads `SECRET_KEY`/`DEBUG`/`ALLOWED_HOSTS` from env) |
-| `.gitignore` | Excludes the venv, db, bytecode, secrets |
+| `render.yaml`, `Procfile` | Kept as fallbacks if you later use Render/Heroku |
+| `tWeb/build.sh` | Generic build script (deps + collectstatic + migrate) |
 
 ---
 
@@ -85,8 +110,7 @@ Refresh your live URL and the changes are live. No manual steps.
 
 ```bash
 cd ~/Desktop/tradingWeb/tWeb
-source ../bin/activate            # local venv
-python manage.py migrate
+source ../bin/activate
 python manage.py runserver
 # → http://127.0.0.1:8000
 ```
@@ -94,16 +118,14 @@ python manage.py runserver
 ---
 
 ## ⚠️ Notes
-
-- **Free tier cold starts:** the service sleeps after 15 min idle; the first
-  request after sleep takes ~30s to wake. For a CV link this is fine. Upgrade to
-  a paid plan only if you need always-on.
-- **SQLite on Render:** the free tier uses an ephemeral disk — the database
-  resets on each deploy. For a read-only portfolio demo this is acceptable. If
-  you later need persistent posts/users, add a Render PostgreSQL database and
-  update `DATABASES` in `settings.py`.
-- **Quant Lab thesis edits:** saved to `tWeb/quant_lab/thesis/*.md` on disk —
-  note these reset on redeploy on the free tier. Commit them to git to persist.
+- **Free tier limits:** PythonAnywhere free allows 512 MB storage, 1 web app,
+  and ~3 months of CPU. Plenty for a CV demo.
+- **External internet (yfinance):** free PythonAnywhere accounts *can* do outbound
+  HTTPS, so the screener pages that call Yahoo Finance will work, just slower.
+- **SQLite persistence:** on PythonAnywhere the file system is **persistent** (unlike
+  Render's ephemeral disk), so your posts/users survive redeploys. 🎉
+- **Quant Lab thesis edits:** saved to `tWeb/quant_lab/thesis/*.md` — on
+  PythonAnywhere these persist too. Commit them to git to mirror locally.
 
 ---
 
