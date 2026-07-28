@@ -70,7 +70,9 @@ ROOT_URLCONF = 'tWeb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        # Absolute path so templates resolve regardless of the working directory
+        # (this is what was breaking on PythonAnywhere — 'templates' was relative).
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
