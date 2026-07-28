@@ -11,9 +11,9 @@ services:
     region: singapore        # closest to HK; change if you prefer
     plan: free               # free tier: spins down after 15 min idle
     branch: main             # deploy from main
-    rootDir: tWeb            # the Django project lives in tWeb/
-    buildCommand: ./build.sh
-    startCommand: gunicorn tWeb.wsgi:application --chdir tWeb
+    rootDir: tWeb            # working dir = tWeb/ for build AND start
+    buildCommand: bash build.sh
+    startCommand: gunicorn tWeb.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /
     autoDeploy: true         # re-deploy automatically on every push to main
     envVars:
