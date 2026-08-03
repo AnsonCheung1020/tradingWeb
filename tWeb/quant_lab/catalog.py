@@ -213,6 +213,49 @@ TOOLKITS: List[Entry] = [
         tags=["factor-research", "CAPM", "cross-section", "summary-stats"],
     ),
     Entry(
+        slug="beta_persistence",
+        title="Beta Persistence — Hedge Decay Diagnostics",
+        category="toolkit",
+        source_file="A02_Persistence_Analysis.ipynb",
+        provenance="actual",
+        summary="Cross-sectional rank correlation of Beta across 1–5yr lags → hedge half-life.",
+        thesis=(
+            "Reproduces Chapter 3 (Persistence) of Bali, Engle & Murray and re-frames "
+            "it as a **live-hedge risk-management primitive** rather than an academic "
+            "summary statistic.\n\n"
+            "## Why this matters in one sentence\n"
+            "When you hedge with Beta, you are *betting that today's Beta will still "
+            "be roughly correct tomorrow*. **Persistence is the number that tells you "
+            "how safe that bet is.**\n\n"
+            "## The failure mode it exposes\n"
+            "A market-neutral book sizes its short-hedge as `Beta × Position`, "
+            "computed *once* at inception. If the true Beta drifts (e.g. 1.5 → 0.8 "
+            "over a quarter) and you don't re-hedge, you silently accumulate an "
+            "**unintended directional bet** (net short $7M in that example). Ex-post, "
+            "hedging P&L looks worse than the stock pick — and the PM usually "
+            "misattributes the leak to *alpha decay* instead of a broken hedge.\n\n"
+            "## Pipeline\n"
+            "1. Estimate each stock's CAPM Beta per year (from `A01`).\n"
+            "2. For each lag τ ∈ {1, 2, 3, 4, 5} years, compute the **cross-sectional "
+            "   rank correlation** ρ(τ) between year-t and year-(t+τ) Betas.\n"
+            "3. Average ρ(τ) across years → the persistence curve.\n"
+            "4. **Half-life** = the lag where ρ decays to ~0.5.\n\n"
+            "## How the persistence number converts into a desk decision\n"
+            "* `ρ₁ = 0.84` → the average stock's Beta ranking is ~84% preserved after "
+            "  one year → an annual re-hedge keeps drift bounded.\n"
+            "* `ρ₃ = 0.60` → only 60% of the signal survives three years → re-hedging "
+            "  every three years leaves ~40% of hedges mis-sized.\n"
+            "* **Rule of thumb:** re-hedge at least twice per half-life.\n\n"
+            "## Why it's a universal diagnostic\n"
+            "The same persistence logic governs *any* factor hedge (size, value, "
+            "momentum, stat-arb signals) and even options delta-hedging (Gamma is just "
+            "the rate of Delta drift). Pre-computing persistence turns invisible hedge "
+            "leakage into a measurable quantity the risk committee can budget: *'our "
+            "market-neutral book carries ≈X% residual Beta drift per quarter.'*"
+        ),
+        tags=["factor-research", "persistence", "hedging", "risk-management", "half-life"],
+    ),
+    Entry(
         slug="fama_macbeth",
         title="Fama–MacBeth Two-Pass Regression",
         category="toolkit",
